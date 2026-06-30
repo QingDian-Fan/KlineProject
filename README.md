@@ -186,7 +186,7 @@ binding.kLineChartView.setMainDrawLine(true)  // 分时线
 如需只验证测试源码编译：
 
 ```bash
-./gradlew :demo:compileDebugAndroidTestKotlin :lib-kline-chart:compileDebugAndroidTestJavaWithJavac
+./gradlew :demo:compileDebugAndroidTestKotlin :lib-kline-chart:compileDebugAndroidTestKotlin
 ```
 
 ## 更多说明

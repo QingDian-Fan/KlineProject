@@ -69,13 +69,13 @@ binding.kLineChartView.startAnimation()
 
 默认数据实体为 `KLineEntity`，主要字段如下：
 
-```java
-public String Date;
-public float Open;
-public float High;
-public float Low;
-public float Close;
-public float Volume;
+```kotlin
+var Date: String? = null
+var Open = 0f
+var High = 0f
+var Low = 0f
+var Close = 0f
+var Volume = 0f
 ```
 
 指标字段包括：
