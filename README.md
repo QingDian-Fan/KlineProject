@@ -1,12 +1,12 @@
 # KLineChart
 
+[![](https://jitpack.io/v/QingDian-Fan/KlineProject.svg)](https://jitpack.io/#QingDian-Fan/KlineProject)
+
 Android K 线图组件与示例工程，支持蜡烛图、分时线、成交量、长按十字线、横向滑动、双指缩放，以及 `MA`、`BOLL`、`MACD`、`KDJ`、`RSI`、`WR` 等常见技术指标。
 
-项目最初基于 [tifezh/KChartView](https://github.com/tifezh/KChartView) 修改，目前已整理为 AndroidX 工程，并拆分为示例应用和组件库两个模块。
 
 ## 当前状态
 
-- 使用 AndroidX，不再依赖 Android Support 包。
 - Gradle Wrapper：`7.2`
 - Android Gradle Plugin：`7.1.0`
 - Kotlin：`1.5.31`
@@ -30,6 +30,28 @@ Android K 线图组件与示例工程，支持蜡烛图、分时线、成交量�
 ![运行效果](img/effect.gif)
 
 ![截图](img/1.png)
+
+## 接入指南
+- Step 1. Add the JitPack repository to your build file
+
+```groovy
+	dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			mavenCentral()
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+- Step 2. Add the dependency
+
+```groovy
+dependencies {
+	        implementation 'com.github.QingDian-Fan:KlineProject:1.0.4'
+	}
+```
+
 
 ## 快速开始
 
@@ -191,6 +213,5 @@ binding.kLineChartView.setMainDrawLine(true)  // 分时线
 
 ## 更多说明
 
-- 常见问题见 [problem.md](./problem.md)。
 - 组件库接入细节见 [lib-kline-chart/README.md](./lib-kline-chart/README.md)。
 - 示例代码见 [demo/src/main/java/com/common/demo/MainActivity.kt](./demo/src/main/java/com/common/demo/MainActivity.kt)。
