@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin:'maven-publish'
 
 android {
     compileSdkVersion 32
@@ -7,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 32
-        versionCode 100
-        versionName "1.0.0"
+        versionCode 101
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -24,6 +25,19 @@ android {
     testOptions {
         // 让 JVM 单元测试中用到的 android.* 方法（如 DataSetObservable）返回默认值而非抛异常
         unitTests.returnDefaultValues = true
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release         // 表示发布 release（jitpack 都不会使用到）
+                groupId = 'com.github.QingDian-Fan' // 这个是依赖库的组 id
+                artifactId = 'lib-kline-chart'       // 依赖库的名称（jitpack 都不会使用到）
+                version ="1.0.1"                //当前版本依赖库版本号，这个jitpack不会使用到，只是我们开发者自己查看
+            }
+        }
     }
 }
 
