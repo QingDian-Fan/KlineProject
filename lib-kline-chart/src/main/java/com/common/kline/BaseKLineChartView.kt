@@ -605,7 +605,14 @@ abstract class BaseKLineChartView @JvmOverloads constructor(
     }
 
     /** 获取平移的最小值 */
-    private fun getMinTranslateX(): Float = -mDataLen + mWidth / mScaleX - mPointWidth / 2
+    private fun getMinTranslateX(): Float {
+        // 数据不足一屏时，从左边开始显示（否则会贴着右边显示，留下大片空白）
+        return if (!isFullScreen()) {
+            mPointWidth / 2
+        } else {
+            -mDataLen + mWidth / mScaleX - mPointWidth / 2
+        }
+    }
 
     /** 获取平移的最大值 */
     private fun getMaxTranslateX(): Float {
