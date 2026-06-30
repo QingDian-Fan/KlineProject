@@ -15,7 +15,8 @@
 - 成交量图：成交量柱状图、成交量 MA5/MA10
 - 图表交互：横向拖动、惯性滑动、双指缩放、长按十字线和详情框
 - 加载更多：滑动到最左侧时触发 `KChartRefreshListener`
-- 样式配置：支持 XML 属性和 Java/Kotlin API 设置颜色、线宽、字号、蜡烛宽度等
+- 实时行情：最后一根原地更新（`updateLast`），跨周期自动新增
+- 样式配置：支持 XML 属性和代码 API 设置颜色、线宽、字号、蜡烛宽度等
 
 ## 模块接入
 
@@ -70,6 +71,7 @@ binding.kLineChartView.startAnimation()
 默认数据实体为 `KLineEntity`，主要字段如下：
 
 ```kotlin
+var barTime = 0L      // 该 K 线所属周期的起始时间戳(毫秒)，实时行情用于判断同一根/新一根；不参与 JSON 反序列化
 var Date: String? = null
 var Open = 0f
 var High = 0f
@@ -132,6 +134,61 @@ binding.kLineChartView.setRefreshListener { chart ->
 - `refreshEnd()`：加载完成且没有更多数据
 - `resetLoadMoreEnd()`：重置没有更多数据的状态
 
+## 实时行情更新
+
+实时行情（如分钟 K 线在一分钟内不断变化、一分钟更新很多次）的核心原则：
+**同一周期内只更新最后一根，跨周期才新增一根**。用 `KLineEntity.barTime`（周期起始时间戳）对齐判断。
+
+| 场景 | 操作 | API |
+| --- | --- | --- |
+| tick 仍属于当前周期 | 原地更新最后一根的 OHLCV | `adapter.updateLast(last)` |
+| tick 进入新周期 | 追加一根 | `adapter.addFooterData(listOf(bar))` |
+
+`updateLast` 不改变数据条数，因此图表不会横向跳动，适合一根 K 线在周期内被高频刷新。
+
+```kotlin
+private val periodMillis = 60_000L // 1 分钟 K
+
+/** 收到实时推送（真实场景在 socket 子线程，更新 UI 需切回主线程） */
+fun onTick(tickTime: Long, price: Float, volume: Float) {
+    val barTime = tickTime - tickTime % periodMillis        // 对齐到所属周期起始
+    val last = adapter.getLastData()
+    if (last != null && last.barTime == barTime) {
+        // 同一根：更新 OHLCV
+        last.Close = price
+        last.High = maxOf(last.High, price)
+        last.Low = minOf(last.Low, price)
+        last.Volume += volume
+        DataHelper.calculate(adapter.getDatas())            // 重算指标
+        runOnUiThread { adapter.updateLast(last) }
+    } else {
+        // 新的一根
+        val bar = KLineEntity().apply {
+            this.barTime = barTime
+            Date = formatTime(barTime)
+            Open = price; High = price; Low = price; Close = price
+            Volume = volume
+        }
+        adapter.addFooterData(listOf(bar))
+        DataHelper.calculate(adapter.getDatas())
+        runOnUiThread { adapter.notifyDataSetChanged() }
+    }
+}
+```
+
+相关适配器方法：
+
+- `getLastData()`：获取最后一根，无数据返回 `null`
+- `getDatas()`：获取只读数据列表，便于对完整数据集调用 `DataHelper.calculate` 重算指标
+- `updateLast(data)`：更新最后一根并刷新（条数不变，视图不跳动）
+
+注意：
+
+- UI 更新必须在主线程；行情来自子线程时用 `runOnUiThread`。
+- 高频（每秒数十次）时建议对 UI 刷新做节流（如每 200~500ms 合并刷新一次），并把指标计算放到后台线程。
+- 不要在实时刷新里调用 `startAnimation()`（那是首次加载的入场动画）。
+- 完整可运行示例见 `demo` 模块 `MainActivity` 的「实时」按钮。
+
 ## 指标切换
 
 主图指标：
@@ -166,6 +223,7 @@ binding.kLineChartView.setScrollEnable(true)
 binding.kLineChartView.setScaleEnable(true)
 binding.kLineChartView.setAnimationDuration(500)
 binding.kLineChartView.setOverScrollRange(100f)
+binding.kLineChartView.setChartRightPadding(40f) // 最后一根柱子距右边留白(px)，价格数值仍贴右
 binding.kLineChartView.setPointWidth(6f)
 binding.kLineChartView.setTextSize(12f)
 binding.kLineChartView.setLineWidth(1f)
@@ -196,6 +254,7 @@ binding.kLineChartView.setOnSelectedChangedListener { _, point, index ->
 | `kc_grid_line_width` | 网格线宽度 |
 | `kc_grid_line_color` | 网格线颜色 |
 | `kc_point_width` | 数据点间距 |
+| `kc_right_padding` | 最后一根柱子距右边的留白（价格数值仍贴右） |
 | `kc_macd_width` | MACD 柱宽度 |
 | `kc_dif_color` | DIF 颜色 |
 | `kc_dea_color` | DEA 颜色 |
@@ -265,6 +324,9 @@ binding.kLineChartView.adapter = adapter
 - `addFooterData(data)`：向尾部追加较新的数据
 - `addHeaderData(data)`：向头部追加较旧的数据
 - `changeItem(position, data)`：替换指定位置的数据
+- `getLastData()`：获取最后一根数据（无数据返回 `null`）
+- `getDatas()`：获取只读数据列表（用于重算指标）
+- `updateLast(data)`：更新最后一根并刷新（实时行情用，条数不变）
 - `clearData()`：清空数据
 - `notifyDataSetChanged()`：通知图表刷新
 
@@ -273,7 +335,10 @@ binding.kLineChartView.adapter = adapter
 ## 注意事项
 
 - 数据应按时间从旧到新排列，分页加载更早数据时使用 `addHeaderData`。
-- 指标字段需要提前计算。使用默认 `KLineEntity` 时可以直接调用 `DataHelper.calculate(dataList)`。
+- 指标字段需要提前计算。使用默认 `KLineEntity` 时可以直接调用 `DataHelper.calculate(dataList)`；
+  指标依赖完整有序数据集，请对**整个列表**计算（可用 `adapter.getDatas()`），不要逐页单独计算，否则跨页/边界处指标会断裂。
+- 实时行情更新最后一根用 `updateLast`，跨周期用 `addFooterData`，并用 `KLineEntity.barTime` 判断是否同一根。
+- 数据不足一屏时，图表会从左侧开始显示。
 - `refreshEnd()` 表示没有更多数据，调用后不会继续自动触发加载更多；需要重新允许加载时调用 `resetLoadMoreEnd()`。
 - 当前库已迁移到 AndroidX，不再依赖旧 Support 包。
 - Demo 工程已经使用 ViewBinding，实际接入时可参考 `demo` 模块。

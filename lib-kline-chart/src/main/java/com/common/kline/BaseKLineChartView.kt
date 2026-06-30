@@ -108,6 +108,9 @@ abstract class BaseKLineChartView @JvmOverloads constructor(
     private var mAnimationDuration = 500L
     private var mOverScrollRange = 0f
 
+    // 最后一根柱子距右边的留白（像素）。只影响柱子最右停靠位置，右侧价格文字仍贴右绘制。
+    private var mRightPadding = 0f
+
     private var mOnSelectedChangedListener: OnSelectedChangedListener? = null
 
     private var mMainRect: Rect? = null
@@ -610,7 +613,8 @@ abstract class BaseKLineChartView @JvmOverloads constructor(
         return if (!isFullScreen()) {
             mPointWidth / 2
         } else {
-            -mDataLen + mWidth / mScaleX - mPointWidth / 2
+            // 减去 mRightPadding：最后一根停靠时距右边留出该留白（价格文字仍按 mWidth 贴右绘制）
+            -mDataLen + (mWidth - mRightPadding) / mScaleX - mPointWidth / 2
         }
     }
 
@@ -825,6 +829,20 @@ abstract class BaseKLineChartView @JvmOverloads constructor(
     /** 设置超出右方后可滑动的范围 */
     fun setOverScrollRange(overScrollRange: Float) {
         mOverScrollRange = if (overScrollRange < 0) 0f else overScrollRange
+    }
+
+    /** 获取最后一根柱子距右边的留白（像素） */
+    fun getChartRightPadding(): Float = mRightPadding
+
+    /**
+     * 设置最后一根柱子距右边的留白（像素）。
+     * 仅影响柱子的最右停靠位置，右侧价格刻度文字仍紧贴右边绘制。
+     */
+    fun setChartRightPadding(rightPadding: Float) {
+        mRightPadding = if (rightPadding < 0) 0f else rightPadding
+        checkAndFixScrollX()
+        setTranslateXFromScrollX(mScrollX)
+        invalidate()
     }
 
     /** 设置上方padding */

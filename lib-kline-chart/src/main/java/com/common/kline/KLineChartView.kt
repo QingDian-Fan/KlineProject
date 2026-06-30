@@ -74,6 +74,7 @@ class KLineChartView @JvmOverloads constructor(
         try {
             // public
             setPointWidth(array.getDimension(R.styleable.KLineChartView_kc_point_width, getDimension(R.dimen.chart_point_width)))
+            setChartRightPadding(array.getDimension(R.styleable.KLineChartView_kc_right_padding, 0f))
             setTextSize(array.getDimension(R.styleable.KLineChartView_kc_text_size, getDimension(R.dimen.chart_text_size)))
             setTextColor(array.getColor(R.styleable.KLineChartView_kc_text_color, getColor(R.color.chart_text)))
             setMTextSize(array.getDimension(R.styleable.KLineChartView_kc_text_size, getDimension(R.dimen.chart_text_size)))

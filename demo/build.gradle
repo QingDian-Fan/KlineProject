@@ -34,5 +34,4 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.2.4'
 
     implementation project(':lib-kline-chart')
-
 }

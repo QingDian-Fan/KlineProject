@@ -21,6 +21,10 @@ android {
         }
     }
 
+    testOptions {
+        // 让 JVM 单元测试中用到的 android.* 方法（如 DataSetObservable）返回默认值而非抛异常
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {

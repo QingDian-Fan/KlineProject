@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorPrimary">
 
     <TextView
@@ -132,6 +133,17 @@
         android:text="k线图"
         android:textColor="@color/colorAccent" />
 
+    <TextView
+        android:id="@+id/realtimeText"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/text2"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/kText"
+        android:gravity="center"
+        android:text="实时▶"
+        android:textColor="@color/white" />
+
     <View
         android:id="@+id/view1"
         android:layout_width="match_parent"
@@ -143,6 +155,7 @@
         android:id="@+id/kLineChartView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:kc_right_padding="30dp"
         android:layout_above="@+id/view2"
         android:layout_below="@+id/view1"
         android:background="@color/colorPrimary"

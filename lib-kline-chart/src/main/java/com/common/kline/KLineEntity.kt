@@ -12,6 +12,13 @@ import com.common.kline.entity.IKLine
 class KLineEntity : IKLine {
 
     var Date: String? = null
+
+    /**
+     * 该 K 线所属周期的起始时间戳（毫秒），用于实时行情判断 tick 属于「当前根」还是「新一根」。
+     * 不在 ibm.json 中，Gson 反序列化时保持默认值 0。
+     */
+    var barTime = 0L
+
     var Open = 0f
     var High = 0f
     var Low = 0f
