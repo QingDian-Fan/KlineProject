@@ -48,7 +48,7 @@ Android K 线图组件与示例工程，支持蜡烛图、分时线、成交量�
 
 ```groovy
 dependencies {
-	        implementation 'com.github.QingDian-Fan:KlineProject:1.0.4'
+	        implementation 'com.github.QingDian-Fan:KlineProject:v1.0.4'
 	}
 ```
 
