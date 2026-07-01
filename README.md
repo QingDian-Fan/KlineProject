@@ -27,9 +27,9 @@ Android K 线图组件与示例工程，支持蜡烛图、分时线、成交量�
 
 ## 运行效果
 
-![运行效果](img/effect.gif)
+![运行效果](img/video.gif)
 
-![截图](img/1.png)
+![截图](img/demo-1.png)
 
 ## 接入指南
 - Step 1. Add the JitPack repository to your build file

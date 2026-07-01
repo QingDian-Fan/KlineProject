@@ -57,14 +57,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.kLineChartView.adapter = adapter
-        binding.kLineChartView.dateTimeFormatter = DateFormatter()
-        binding.kLineChartView.setGridRows(4)
-        binding.kLineChartView.setGridColumns(4)
+        initChart()
         initData()
         initListener()
     }
 
+    private fun initChart(){
+        binding.kLineChartView.adapter = adapter
+        binding.kLineChartView.dateTimeFormatter = DateFormatter()
+        binding.kLineChartView.setGridRows(4)
+        binding.kLineChartView.setGridColumns(4)
+    }
     private fun initData() {
         binding.kLineChartView.justShowLoading()
         Thread {
